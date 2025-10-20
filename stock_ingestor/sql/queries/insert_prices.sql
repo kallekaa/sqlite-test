@@ -1,6 +1,7 @@
 INSERT OR REPLACE INTO prices (
     ticker,
     date,
+    timestamp_utc,
     open,
     high,
     low,
@@ -10,6 +11,7 @@ INSERT OR REPLACE INTO prices (
 ) VALUES (
     :ticker,
     :date,
+    :timestamp_utc,
     :open,
     :high,
     :low,

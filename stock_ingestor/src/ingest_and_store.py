@@ -6,14 +6,22 @@ import sqlite3
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Iterable, List, Optional
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 
-from utils import QUERIES_DIR, ROOT_DIR, load_schema, load_sql
+from utils import (
+    QUERIES_DIR,
+    ROOT_DIR,
+    get_trading_calendar,
+    load_schema,
+    load_sql,
+)
 
 PRICE_COLUMNS = [
     "ticker",
     "date",
+    "timestamp_utc",
     "open",
     "high",
     "low",
@@ -45,7 +53,7 @@ def fetch_ticker_frame(
         interval=interval,
         auto_adjust=False,
         progress=False,
-        actions=False,
+        actions=True,
         threads=False,
     )
 
@@ -60,6 +68,11 @@ def fetch_ticker_frame(
         str(column).lower().replace(" ", "_") for column in data.columns
     ]
 
+    # Drop action columns after adjustments are captured.
+    for extra in ("dividends", "stock_splits"):
+        if extra in data.columns:
+            data = data.drop(columns=extra)
+
     required = {"open", "high", "low", "close"}
     missing = required.difference(data.columns)
     if missing:
@@ -71,18 +84,42 @@ def fetch_ticker_frame(
     if "volume" not in data.columns:
         data["volume"] = 0
 
-    data = data.reset_index()
-    if "Date" in data.columns:
-        data = data.rename(columns={"Date": "date"})
-    elif "index" in data.columns:
-        data = data.rename(columns={"index": "date"})
-    if pd.api.types.is_datetime64_any_dtype(data["date"]):
-        data["date"] = data["date"].dt.strftime("%Y-%m-%d")
+    index = pd.to_datetime(data.index)
+    if index.tz is None:
+        index = index.tz_localize("UTC")
+    else:
+        index = index.tz_convert("UTC")
+    data.index = index
+
+    calendar = get_trading_calendar(start, end)
+    data = data.reindex(calendar)
+
+    adj_close = data["adj_close"]
+    close = data["close"].replace(0, np.nan)
+    adj_factor = (adj_close / close).replace([np.inf, -np.inf], np.nan).fillna(1.0)
+
+    for column in ("open", "high", "low", "close"):
+        data[column] = (data[column] * adj_factor).astype("float64")
+    data["close"] = adj_close.astype("float64")
+    data["adj_close"] = adj_close.astype("float64")
+    safe_factor = adj_factor.replace(0, 1.0)
+    data["volume"] = (data["volume"] / safe_factor).fillna(0)
+    data["volume"] = data["volume"].clip(lower=0)
+
+    float_columns = ["open", "high", "low", "close", "adj_close"]
+    data[float_columns] = data[float_columns].ffill()
+    data["volume"] = data["volume"].fillna(0)
+
+    data = data.dropna(subset=float_columns)
+
+    data = data.reset_index().rename(columns={"index": "timestamp_utc"})
+    timestamp_series = pd.to_datetime(data["timestamp_utc"]).dt.tz_convert("UTC")
+    data["timestamp_utc"] = timestamp_series.dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    data["date"] = timestamp_series.dt.strftime("%Y-%m-%d")
 
     data.insert(0, "ticker", ticker)
     data = data[PRICE_COLUMNS]
-    data = data.dropna(subset=["open", "high", "low", "close", "adj_close"])
-    data["volume"] = data["volume"].fillna(0).astype("int64")
+    data["volume"] = data["volume"].round().astype("int64")
     return data
 
 

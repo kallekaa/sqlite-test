@@ -21,8 +21,12 @@ FEATURE_COLUMNS = [
     "return_1d",
     "return_5d",
     "return_10d",
+    "log_return_1d",
+    "log_return_5d",
+    "log_return_10d",
     "rolling_mean_return_5d",
     "rolling_std_return_5d",
+    "rolling_sharpe_5d",
     "momentum_5d",
     "price_change",
     "sma_5",
@@ -35,6 +39,13 @@ FEATURE_COLUMNS = [
     "sma_ratio_5_20",
     "rolling_std_close_5d",
     "rolling_std_close_10d",
+    "rolling_std_close_20d",
+    "bollinger_upper_20d",
+    "bollinger_lower_20d",
+    "bollinger_bandwidth_20d",
+    "macd_line",
+    "macd_signal",
+    "macd_hist",
     "true_range",
     "avg_true_range_5d",
     "volatility_ratio",
@@ -48,7 +59,11 @@ FEATURE_COLUMNS = [
     "rolling_high_20d",
     "rolling_low_20d",
     "close_to_rolling_high_20d",
+    "drawdown",
+    "max_drawdown_20d",
     "rsi_14",
+    "streak_up",
+    "streak_down",
 ]
 
 
@@ -78,7 +93,15 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
         return df
 
     df = df.sort_values(["ticker", "date"]).copy()
+    df["volume"] = df["volume"].clip(lower=0)
     grouped = df.groupby("ticker", group_keys=False)
+
+    def _winsorize(series: pd.Series, lower: float = 0.01, upper: float = 0.99) -> pd.Series:
+        if series.count() == 0:
+            return series
+        lower_q = series.quantile(lower)
+        upper_q = series.quantile(upper)
+        return series.clip(lower_q, upper_q)
 
     # Lag features
     df["close_lag_1"] = grouped["close"].shift(1)
@@ -88,11 +111,32 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     df["volume_lag_3"] = grouped["volume"].shift(3)
 
     # Return and momentum features
-    df["return_1d"] = grouped["close"].pct_change(1)
-    df["return_5d"] = grouped["close"].pct_change(5)
-    df["return_10d"] = grouped["close"].pct_change(10)
+    prev_close = grouped["close"].shift(1).replace(0, np.nan)
+    close_lag_5 = grouped["close"].shift(5).replace(0, np.nan)
+    close_lag_10 = grouped["close"].shift(10).replace(0, np.nan)
+
+    df["return_1d"] = (df["close"] / prev_close) - 1
+    df["return_5d"] = (df["close"] / close_lag_5) - 1
+    df["return_10d"] = (df["close"] / close_lag_10) - 1
+
+    df["log_return_1d"] = np.log(df["close"] / prev_close)
+    df["log_return_5d"] = np.log(df["close"] / close_lag_5)
+    df["log_return_10d"] = np.log(df["close"] / close_lag_10)
+
+    for column in [
+        "return_1d",
+        "return_5d",
+        "return_10d",
+        "log_return_1d",
+        "log_return_5d",
+        "log_return_10d",
+    ]:
+        df[column] = grouped[column].transform(_winsorize)
+
     df["rolling_mean_return_5d"] = grouped["return_1d"].transform(lambda s: s.rolling(window=5).mean())
     df["rolling_std_return_5d"] = grouped["return_1d"].transform(lambda s: s.rolling(window=5).std())
+    df["rolling_sharpe_5d"] = df["rolling_mean_return_5d"] / (df["rolling_std_return_5d"].replace(0, np.nan))
+
     df["momentum_5d"] = df["close"] / grouped["close"].shift(5)
     df["price_change"] = df["close"] - df["open"]
 
@@ -109,12 +153,23 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     # Volatility features
     df["rolling_std_close_5d"] = grouped["close"].transform(lambda s: s.rolling(window=5).std())
     df["rolling_std_close_10d"] = grouped["close"].transform(lambda s: s.rolling(window=10).std())
+    df["rolling_std_close_20d"] = grouped["close"].transform(lambda s: s.rolling(window=20).std())
+    df["bollinger_upper_20d"] = df["sma_20"] + 2 * df["rolling_std_close_20d"]
+    df["bollinger_lower_20d"] = df["sma_20"] - 2 * df["rolling_std_close_20d"]
+    df["bollinger_bandwidth_20d"] = (df["bollinger_upper_20d"] - df["bollinger_lower_20d"]) / df["sma_20"]
     df["true_range"] = df["high"] - df["low"]
     df["avg_true_range_5d"] = grouped["true_range"].transform(lambda s: s.rolling(window=5).mean())
     df["volatility_ratio"] = df["rolling_std_close_5d"] / df["sma_5"]
 
+    ema_12 = grouped["close"].transform(lambda s: s.ewm(span=12, adjust=False).mean())
+    ema_26 = grouped["close"].transform(lambda s: s.ewm(span=26, adjust=False).mean())
+    df["macd_line"] = ema_12 - ema_26
+    df["macd_signal"] = grouped["macd_line"].transform(lambda s: s.ewm(span=9, adjust=False).mean())
+    df["macd_hist"] = df["macd_line"] - df["macd_signal"]
+
     # Volume-based features
     df["volume_change"] = grouped["volume"].pct_change(1)
+    df["volume_change"] = grouped["volume_change"].transform(_winsorize)
     df["volume_sma_5"] = grouped["volume"].transform(lambda s: s.rolling(window=5).mean())
     df["volume_sma_10"] = grouped["volume"].transform(lambda s: s.rolling(window=10).mean())
     df["volume_zscore_5d"] = grouped["volume"].transform(
@@ -143,10 +198,41 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[avg_loss == 0, "rsi_14"] = 100
     df.loc[(avg_gain == 0) & (avg_loss == 0), "rsi_14"] = 50
 
+    rolling_max = grouped["close"].cummax()
+    df["drawdown"] = (df["close"] / rolling_max) - 1
+    df["max_drawdown_20d"] = grouped["drawdown"].transform(lambda s: s.rolling(window=20).min())
+
+    def _streaks(returns: pd.Series) -> pd.DataFrame:
+        up = np.zeros(len(returns), dtype=int)
+        down = np.zeros(len(returns), dtype=int)
+        last_up = 0
+        last_down = 0
+        for idx, value in enumerate(returns):
+            if pd.isna(value) or value == 0:
+                last_up = 0
+                last_down = 0
+            elif value > 0:
+                last_up += 1
+                last_down = 0
+            else:
+                last_down += 1
+                last_up = 0
+            up[idx] = last_up
+            down[idx] = last_down
+        return pd.DataFrame({"streak_up": up, "streak_down": down}, index=returns.index)
+
+    streaks = grouped["return_1d"].apply(_streaks)
+    if isinstance(streaks.index, pd.MultiIndex):
+        streaks = streaks.reset_index(level=0, drop=True)
+    df["streak_up"] = streaks["streak_up"]
+    df["streak_down"] = streaks["streak_down"]
+
     df["close_to_rolling_high_20d"] = df["close_to_rolling_high_20d"].replace([np.inf, -np.inf], np.nan)
     df["volatility_ratio"] = df["volatility_ratio"].replace([np.inf, -np.inf], np.nan)
     df["volume_zscore_5d"] = df["volume_zscore_5d"].replace([np.inf, -np.inf], np.nan)
     df["close_position_in_range"] = df["close_position_in_range"].replace([np.inf, -np.inf], np.nan)
+    df["bollinger_bandwidth_20d"] = df["bollinger_bandwidth_20d"].replace([np.inf, -np.inf], np.nan)
+    df["rolling_sharpe_5d"] = df["rolling_sharpe_5d"].replace([np.inf, -np.inf], np.nan)
 
     feature_df = df[FEATURE_COLUMNS].copy()
     feature_df = feature_df.replace([np.inf, -np.inf], np.nan)
@@ -154,6 +240,16 @@ def compute_features(df: pd.DataFrame) -> pd.DataFrame:
     feature_df["date"] = feature_df["date"].dt.strftime("%Y-%m-%d")
     feature_df["volume_lag_1"] = feature_df["volume_lag_1"].round().astype("Int64")
     feature_df["volume_lag_3"] = feature_df["volume_lag_3"].round().astype("Int64")
+    feature_df["streak_up"] = feature_df["streak_up"].fillna(0).round().astype("Int64")
+    feature_df["streak_down"] = feature_df["streak_down"].fillna(0).round().astype("Int64")
+
+    float_columns = [
+        column
+        for column in FEATURE_COLUMNS
+        if column
+        not in {"ticker", "date", "volume_lag_1", "volume_lag_3", "streak_up", "streak_down"}
+    ]
+    feature_df[float_columns] = feature_df[float_columns].astype("float64")
 
     return feature_df[FEATURE_COLUMNS]
 
