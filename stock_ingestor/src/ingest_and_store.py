@@ -2,29 +2,46 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
-from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from datetime import date, datetime, timedelta
+from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 import yfinance as yf
 
+from utils import QUERIES_DIR, ROOT_DIR, load_schema, load_sql
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = ROOT_DIR / "config" / "schema.json"
+PRICE_COLUMNS = [
+    "ticker",
+    "date",
+    "open",
+    "high",
+    "low",
+    "close",
+    "adj_close",
+    "volume",
+]
 
 
-def load_schema() -> Dict[str, Any]:
-    with SCHEMA_PATH.open("r", encoding="utf-8") as fh:
-        return json.load(fh)
+def parse_date(value: Optional[str]) -> Optional[date]:
+    if value is None:
+        return None
+    return datetime.fromisoformat(value).date()
 
 
-def fetch_ticker_frame(ticker: str, period: str, interval: str) -> pd.DataFrame:
-    print(f"Fetching data for {ticker} ({period}, {interval})")
+def fetch_ticker_frame(
+    ticker: str,
+    start: date,
+    end: date,
+    interval: str,
+) -> pd.DataFrame:
+    start_str = start.strftime("%Y-%m-%d")
+    end_str = end.strftime("%Y-%m-%d")
+    print(f"Fetching data for {ticker} ({start_str} -> {end_str}, {interval})")
     data = yf.download(
         tickers=ticker,
-        period=period,
+        start=start_str,
+        end=end_str,
         interval=interval,
         auto_adjust=False,
         progress=False,
@@ -63,70 +80,75 @@ def fetch_ticker_frame(ticker: str, period: str, interval: str) -> pd.DataFrame:
         data["date"] = data["date"].dt.strftime("%Y-%m-%d")
 
     data.insert(0, "ticker", ticker)
-    data = data[["ticker", "date", "open", "high", "low", "close", "adj_close", "volume"]]
+    data = data[PRICE_COLUMNS]
     data = data.dropna(subset=["open", "high", "low", "close", "adj_close"])
     data["volume"] = data["volume"].fillna(0).astype("int64")
     return data
 
 
-def iter_rows(dataframe: pd.DataFrame, columns: List[str]) -> Iterable[Tuple[Any, ...]]:
+def iter_records(dataframe: pd.DataFrame, columns: List[str]) -> Iterable[Dict[str, Any]]:
     sanitized = dataframe.where(pd.notnull(dataframe), None)
     for record in sanitized.to_dict(orient="records"):
-        yield tuple(record[column] for column in columns)
+        yield {column: record[column] for column in columns}
 
 
 def store_frames(
     connection: sqlite3.Connection,
-    table_schema: Dict[str, Any],
+    table_name: str,
     frames: List[pd.DataFrame],
+    insert_sql: str,
 ) -> None:
     merged = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     if merged.empty:
         print("No data to insert.")
         return
 
-    columns = [column["name"] for column in table_schema["columns"]]
-    placeholders = ", ".join(["?"] * len(columns))
-    sql = f"INSERT OR REPLACE INTO {table_schema['name']} ({', '.join(columns)}) VALUES ({placeholders})"
-
-    rows = list(iter_rows(merged, columns))
-    print(f"Inserting {len(rows)} rows into {table_schema['name']}")
-    connection.executemany(sql, rows)
+    rows = list(iter_records(merged, PRICE_COLUMNS))
+    print(f"Inserting {len(rows)} rows into {table_name}")
+    connection.executemany(insert_sql, rows)
     connection.commit()
 
 
 def main() -> None:
     schema = load_schema()
     ingest_settings = schema.get("ingest", {})
+    query_cfg = schema.get("query", {})
+
+    table_name = query_cfg.get("table")
+    if not table_name:
+        raise ValueError("Query configuration must specify 'table'.")
+
     tickers: List[str] = ingest_settings.get("tickers", [])
-    period: str = ingest_settings.get("period", "1mo")
+    end_date_cfg = ingest_settings.get("end_date")
+    start_date_cfg = ingest_settings.get("start_date")
+
+    end_date_dt = parse_date(end_date_cfg) or date.today()
+    start_date_dt = parse_date(start_date_cfg) or (end_date_dt - timedelta(days=365))
+
+    if start_date_dt >= end_date_dt:
+        raise ValueError("Ingest start_date must be earlier than end_date.")
+
     interval: str = ingest_settings.get("interval", "1d")
 
     if not tickers:
         raise ValueError("At least one ticker must be configured for ingestion.")
 
     db_path = ROOT_DIR / schema["database"]
-    connection = sqlite3.connect(db_path)
+    insert_sql_path = QUERIES_DIR / f"insert_{table_name}.sql"
+    insert_sql = load_sql(insert_sql_path)
 
-    table_name = schema["query"]["table"]
-    table_schema = next(
-        (table for table in schema["tables"] if table["name"] == table_name),
-        None,
-    )
-    if table_schema is None:
-        connection.close()
-        raise ValueError(f"Table {table_name} defined in query config is missing from schema.")
+    connection = sqlite3.connect(db_path)
 
     try:
         frames = [
             frame
             for frame in (
-                fetch_ticker_frame(ticker, period, interval)
+                fetch_ticker_frame(ticker, start_date_dt, end_date_dt, interval)
                 for ticker in tickers
             )
             if not frame.empty
         ]
-        store_frames(connection, table_schema, frames)
+        store_frames(connection, table_name, frames, insert_sql)
     finally:
         connection.close()
         print("Database connection closed.")

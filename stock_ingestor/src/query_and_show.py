@@ -2,25 +2,18 @@
 
 from __future__ import annotations
 
-import json
 import sqlite3
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
+from utils import QUERIES_DIR, ROOT_DIR, load_schema, load_sql
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-SCHEMA_PATH = ROOT_DIR / "config" / "schema.json"
-
-
-def load_schema() -> Dict[str, Any]:
-    with SCHEMA_PATH.open("r", encoding="utf-8") as fh:
-        return json.load(fh)
+DEFAULT_QUERY_TICKERS = ["AAPL"]
 
 
-def build_query(query_cfg: Dict[str, Any]) -> Tuple[str, List[Any]]:
-    table = query_cfg["table"]
+def build_query(base_sql: str, query_cfg: Dict[str, Any]) -> Tuple[str, List[Any]]:
     clauses: List[str] = []
     params: List[Any] = []
 
@@ -40,13 +33,10 @@ def build_query(query_cfg: Dict[str, Any]) -> Tuple[str, List[Any]]:
         clauses.append("date <= ?")
         params.append(end_date)
 
-    where_clause = f" WHERE {' AND '.join(clauses)}" if clauses else ""
-    sql = f"""
-        SELECT ticker, date, open, high, low, close, adj_close, volume
-        FROM {table}
-        {where_clause}
-        ORDER BY date ASC, ticker ASC
-    """
+    sql = base_sql.strip()
+    if clauses:
+        sql = f"{sql}\nWHERE {' AND '.join(clauses)}"
+    sql = f"{sql}\nORDER BY date ASC, ticker ASC"
     return sql, params
 
 
@@ -71,8 +61,12 @@ def show_summary(df: pd.DataFrame) -> None:
     print("\nLatest rows:")
     print(df.sort_values("date").groupby("ticker").tail(3))
 
-    print("\nDescriptive statistics (numeric columns):")
-    print(df.describe(numeric_only=True))
+    numeric_df = df.select_dtypes(include="number")
+    if not numeric_df.empty:
+        print("\nDescriptive statistics (numeric columns):")
+        print(numeric_df.describe())
+    else:
+        print("\nNo numeric columns available for descriptive statistics.")
 
 
 def save_visualization(df: pd.DataFrame) -> None:
@@ -108,7 +102,20 @@ def save_visualization(df: pd.DataFrame) -> None:
 
 def main() -> None:
     schema = load_schema()
-    sql, params = build_query(schema.get("query", {}))
+    query_cfg = schema.get("query", {})
+    effective_query_cfg = dict(query_cfg)
+    effective_query_cfg["tickers"] = (
+        (query_cfg.get("tickers") or DEFAULT_QUERY_TICKERS)
+        if query_cfg is not None
+        else DEFAULT_QUERY_TICKERS
+    )
+
+    table_name = effective_query_cfg.get("table")
+    if not table_name:
+        raise ValueError("Query configuration must specify 'table'.")
+    select_sql_path = QUERIES_DIR / f"select_{table_name}.sql"
+    base_sql = load_sql(select_sql_path)
+    sql, params = build_query(base_sql, effective_query_cfg)
     db_path = ROOT_DIR / schema["database"]
 
     print("Running query...")
