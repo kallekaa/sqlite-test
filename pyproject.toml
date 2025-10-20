@@ -1,0 +1,15 @@
+[project]
+name = "stock-ingestor"
+version = "0.1.0"
+description = "Fetch stock data with yfinance, persist it in SQLite, and explore it with pandas."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=1.5",
+    "yfinance>=0.2",
+    "matplotlib>=3.6",
+]
+
+[build-system]
+requires = ["setuptools>=67"]
+build-backend = "setuptools.build_meta"

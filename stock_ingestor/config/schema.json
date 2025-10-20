@@ -1,0 +1,30 @@
+{
+  "database": "stocks.db",
+  "tables": [
+    {
+      "name": "prices",
+      "primary_key": ["ticker", "date"],
+      "columns": [
+        {"name": "ticker", "type": "TEXT"},
+        {"name": "date", "type": "TEXT"},
+        {"name": "open", "type": "REAL"},
+        {"name": "high", "type": "REAL"},
+        {"name": "low", "type": "REAL"},
+        {"name": "close", "type": "REAL"},
+        {"name": "adj_close", "type": "REAL"},
+        {"name": "volume", "type": "INTEGER"}
+      ]
+    }
+  ],
+  "ingest": {
+    "tickers": ["AAPL", "MSFT", "GOOGL"],
+    "period": "1mo",
+    "interval": "1d"
+  },
+  "query": {
+    "table": "prices",
+    "tickers": ["AAPL"],
+    "start_date": null,
+    "end_date": null
+  }
+}
