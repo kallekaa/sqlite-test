@@ -8,6 +8,7 @@ dependencies = [
     "pandas>=1.5",
     "yfinance>=0.2",
     "matplotlib>=3.6",
+    "scikit-learn>=1.1",
 ]
 
 [build-system]

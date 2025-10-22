@@ -1,0 +1,113 @@
+{
+  "AAPL": {
+    "train": {
+      "size": 189,
+      "metrics": {
+        "precision": 0.6326530612244898,
+        "recall": 0.5961538461538461,
+        "f1": 0.6138613861386139,
+        "accuracy": 0.5873015873015873,
+        "roc_auc": 0.6195701357466062
+      },
+      "class_distribution": {
+        "positives": 104,
+        "negatives": 85,
+        "positive_rate": 0.5502645502645502
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "precision": 0.4666666666666667,
+        "recall": 0.2916666666666667,
+        "f1": 0.358974358974359,
+        "accuracy": 0.4791666666666667,
+        "roc_auc": 0.5069444444444444
+      },
+      "class_distribution": {
+        "positives": 24,
+        "negatives": 24,
+        "positive_rate": 0.5
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\logistic_regression_next_day_AAPL.pkl",
+      "roc_curve_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\plots\\roc_curve_AAPL.png",
+      "confusion_matrix_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\plots\\confusion_matrix_AAPL.png"
+    }
+  },
+  "MSFT": {
+    "train": {
+      "size": 189,
+      "metrics": {
+        "precision": 0.6559139784946236,
+        "recall": 0.5865384615384616,
+        "f1": 0.6192893401015228,
+        "accuracy": 0.6031746031746031,
+        "roc_auc": 0.6122171945701357
+      },
+      "class_distribution": {
+        "positives": 104,
+        "negatives": 85,
+        "positive_rate": 0.5502645502645502
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "precision": 0.8333333333333334,
+        "recall": 0.2,
+        "f1": 0.3225806451612903,
+        "accuracy": 0.5625,
+        "roc_auc": 0.4956521739130435
+      },
+      "class_distribution": {
+        "positives": 25,
+        "negatives": 23,
+        "positive_rate": 0.5208333333333334
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\logistic_regression_next_day_MSFT.pkl",
+      "roc_curve_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\plots\\roc_curve_MSFT.png",
+      "confusion_matrix_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\plots\\confusion_matrix_MSFT.png"
+    }
+  },
+  "GOOGL": {
+    "train": {
+      "size": 189,
+      "metrics": {
+        "precision": 0.5833333333333334,
+        "recall": 0.5773195876288659,
+        "f1": 0.5803108808290155,
+        "accuracy": 0.5714285714285714,
+        "roc_auc": 0.6206857911250561
+      },
+      "class_distribution": {
+        "positives": 97,
+        "negatives": 92,
+        "positive_rate": 0.5132275132275133
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "precision": 0.5,
+        "recall": 0.4,
+        "f1": 0.4444444444444444,
+        "accuracy": 0.4791666666666667,
+        "roc_auc": 0.5321739130434783
+      },
+      "class_distribution": {
+        "positives": 25,
+        "negatives": 23,
+        "positive_rate": 0.5208333333333334
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\logistic_regression_next_day_GOOGL.pkl",
+      "roc_curve_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\plots\\roc_curve_GOOGL.png",
+      "confusion_matrix_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\classification\\plots\\confusion_matrix_GOOGL.png"
+    }
+  }
+}
