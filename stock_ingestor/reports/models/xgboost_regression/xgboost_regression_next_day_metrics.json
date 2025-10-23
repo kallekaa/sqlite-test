@@ -1,0 +1,113 @@
+{
+  "AAPL": {
+    "train": {
+      "size": 188,
+      "metrics": {
+        "rmse": 0.011411628835134089,
+        "mae": 0.008421390614611036,
+        "r2": 0.999999603905424
+      },
+      "target_stats": {
+        "mean": 220.09923277509972,
+        "std": 18.180520444659678,
+        "min": 171.9989776611328,
+        "max": 258.1037292480469,
+        "median": 216.9090576171875
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "rmse": 6.612828236354499,
+        "mae": 5.312291145324707,
+        "r2": 0.6883703762001057
+      },
+      "target_stats": {
+        "mean": 243.65583260854086,
+        "std": 11.971251762616735,
+        "min": 224.89999389648438,
+        "max": 262.7699890136719,
+        "median": 242.5250015258789
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\xgb_regression_next_day_AAPL.json",
+      "scaler_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\xgb_regression_next_day_AAPL_scaler.pkl",
+      "plot_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\plots\\xgb_next_day_predictions_AAPL.png"
+    }
+  },
+  "MSFT": {
+    "train": {
+      "size": 188,
+      "metrics": {
+        "rmse": 0.016379275613129785,
+        "mae": 0.012011101905335771,
+        "r2": 0.9999998707304177
+      },
+      "target_stats": {
+        "mean": 436.8088344817466,
+        "std": 45.67774328993481,
+        "min": 353.3294372558594,
+        "max": 534.7609252929688,
+        "median": 430.32484436035156
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "rmse": 9.579295128271907,
+        "mae": 7.712140401204427,
+        "r2": -0.687467457704884
+      },
+      "target_stats": {
+        "mean": 511.4273090362549,
+        "std": 7.452252135851601,
+        "min": 495.0,
+        "max": 528.5700073242188,
+        "median": 510.55499267578125
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\xgb_regression_next_day_MSFT.json",
+      "scaler_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\xgb_regression_next_day_MSFT_scaler.pkl",
+      "plot_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\plots\\xgb_next_day_predictions_MSFT.png"
+    }
+  },
+  "GOOGL": {
+    "train": {
+      "size": 188,
+      "metrics": {
+        "rmse": 0.007582218898929434,
+        "mae": 0.005545514695187832,
+        "r2": 0.9999997373144383
+      },
+      "target_stats": {
+        "mean": 176.35233168906353,
+        "std": 14.833250746867696,
+        "min": 144.39588928222656,
+        "max": 205.7093505859375,
+        "median": 174.80460357666016
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "rmse": 48.00935311999837,
+        "mae": 43.29334227244059,
+        "r2": -5.8778814496679574
+      },
+      "target_stats": {
+        "mean": 235.80450693766275,
+        "std": 18.49993494038766,
+        "min": 199.1418914794922,
+        "max": 256.54998779296875,
+        "median": 244.33499908447266
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\xgb_regression_next_day_GOOGL.json",
+      "scaler_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\xgb_regression_next_day_GOOGL_scaler.pkl",
+      "plot_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\xgboost_regression\\plots\\xgb_next_day_predictions_GOOGL.png"
+    }
+  }
+}
