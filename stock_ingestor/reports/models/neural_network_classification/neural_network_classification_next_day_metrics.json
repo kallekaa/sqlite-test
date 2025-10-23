@@ -1,0 +1,338 @@
+{
+  "AAPL": {
+    "train": {
+      "size": 189,
+      "metrics": {
+        "accuracy": 0.5396825396825397,
+        "precision": 0.5449438202247191,
+        "recall": 0.941747572815534,
+        "f1": 0.6903914590747331,
+        "roc_auc": 0.46342289455859115
+      },
+      "class_distribution": {
+        "positives": 103,
+        "negatives": 86,
+        "positive_rate": 0.544973544973545
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "accuracy": 0.5,
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6666666666666666,
+        "roc_auc": 0.5225694444444444
+      },
+      "class_distribution": {
+        "positives": 24,
+        "negatives": 24,
+        "positive_rate": 0.5
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\nn_classification_next_day_AAPL.keras",
+      "scaler_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\nn_classification_next_day_AAPL_scaler.pkl",
+      "roc_curve_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\plots\\nn_classification_roc_AAPL.png",
+      "confusion_matrix_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\plots\\nn_classification_confusion_AAPL.png"
+    },
+    "training_history": {
+      "accuracy": [
+        0.5132275223731995,
+        0.5343915224075317,
+        0.5608465671539307,
+        0.5291005373001099,
+        0.5661375522613525,
+        0.5132275223731995,
+        0.5661375522613525,
+        0.5555555820465088,
+        0.5820105671882629,
+        0.5608465671539307,
+        0.5714285969734192
+      ],
+      "loss": [
+        0.7047638893127441,
+        0.7038227319717407,
+        0.6835002303123474,
+        0.6907886266708374,
+        0.6849674582481384,
+        0.6924950480461121,
+        0.676024317741394,
+        0.6795161962509155,
+        0.6676601767539978,
+        0.6777586936950684,
+        0.6787401437759399
+      ],
+      "val_accuracy": [
+        0.5,
+        0.5,
+        0.5,
+        0.5208333134651184,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5208333134651184,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5208333134651184
+      ],
+      "val_loss": [
+        0.6961269378662109,
+        0.696730375289917,
+        0.6967231631278992,
+        0.6968385577201843,
+        0.696861207485199,
+        0.696943461894989,
+        0.697157084941864,
+        0.6979379653930664,
+        0.6993182301521301,
+        0.7005570530891418,
+        0.7013246417045593
+      ]
+    }
+  },
+  "MSFT": {
+    "train": {
+      "size": 189,
+      "metrics": {
+        "accuracy": 0.656084656084656,
+        "precision": 0.6484375,
+        "recall": 0.8058252427184466,
+        "f1": 0.7186147186147186,
+        "roc_auc": 0.697335741702416
+      },
+      "class_distribution": {
+        "positives": 103,
+        "negatives": 86,
+        "positive_rate": 0.544973544973545
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "accuracy": 0.5208333333333334,
+        "precision": 0.5483870967741935,
+        "recall": 0.6538461538461539,
+        "f1": 0.5964912280701754,
+        "roc_auc": 0.548951048951049
+      },
+      "class_distribution": {
+        "positives": 26,
+        "negatives": 22,
+        "positive_rate": 0.5416666666666666
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\nn_classification_next_day_MSFT.keras",
+      "scaler_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\nn_classification_next_day_MSFT_scaler.pkl",
+      "roc_curve_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\plots\\nn_classification_roc_MSFT.png",
+      "confusion_matrix_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\plots\\nn_classification_confusion_MSFT.png"
+    },
+    "training_history": {
+      "accuracy": [
+        0.49735450744628906,
+        0.523809552192688,
+        0.5396825671195984,
+        0.5714285969734192,
+        0.5820105671882629,
+        0.5132275223731995,
+        0.5661375522613525,
+        0.5820105671882629,
+        0.5714285969734192,
+        0.5661375522613525,
+        0.5925925970077515,
+        0.5978835821151733,
+        0.6243386268615723,
+        0.5978835821151733,
+        0.5925925970077515,
+        0.5978835821151733,
+        0.6666666865348816,
+        0.6190476417541504,
+        0.6507936716079712,
+        0.6455026268959045,
+        0.6507936716079712,
+        0.6402116417884827,
+        0.6666666865348816,
+        0.6666666865348816,
+        0.6560846567153931
+      ],
+      "loss": [
+        0.694936215877533,
+        0.6893522143363953,
+        0.6837912201881409,
+        0.6865334510803223,
+        0.6701148152351379,
+        0.6849408149719238,
+        0.6769207119941711,
+        0.671051561832428,
+        0.6659129858016968,
+        0.6642497181892395,
+        0.6640649437904358,
+        0.6581800580024719,
+        0.6621130108833313,
+        0.663208544254303,
+        0.659430742263794,
+        0.658825159072876,
+        0.6542229056358337,
+        0.6508429050445557,
+        0.6581546068191528,
+        0.6497308611869812,
+        0.6530675888061523,
+        0.6377426981925964,
+        0.6452973484992981,
+        0.639456033706665,
+        0.6370255947113037
+      ],
+      "val_accuracy": [
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5416666865348816,
+        0.5625,
+        0.6041666865348816,
+        0.6041666865348816,
+        0.5833333134651184,
+        0.5625,
+        0.5833333134651184,
+        0.5416666865348816,
+        0.5208333134651184,
+        0.5416666865348816,
+        0.5,
+        0.5,
+        0.4791666567325592,
+        0.4583333432674408,
+        0.4583333432674408,
+        0.4791666567325592,
+        0.4791666567325592,
+        0.5,
+        0.5
+      ],
+      "val_loss": [
+        0.7006123661994934,
+        0.699354350566864,
+        0.6981301307678223,
+        0.6967933177947998,
+        0.6955553889274597,
+        0.6943497657775879,
+        0.6933987736701965,
+        0.6926183104515076,
+        0.6918360590934753,
+        0.6911525726318359,
+        0.69053053855896,
+        0.6897926926612854,
+        0.6890413165092468,
+        0.6883819699287415,
+        0.6881160140037537,
+        0.6881430745124817,
+        0.688387393951416,
+        0.6886489391326904,
+        0.6888866424560547,
+        0.6892681121826172,
+        0.6900680661201477,
+        0.6907256245613098,
+        0.6911489367485046,
+        0.6913037300109863,
+        0.6916539669036865
+      ]
+    }
+  },
+  "GOOGL": {
+    "train": {
+      "size": 189,
+      "metrics": {
+        "accuracy": 0.4973544973544973,
+        "precision": 0.5093167701863354,
+        "recall": 0.8367346938775511,
+        "f1": 0.6332046332046332,
+        "roc_auc": 0.47802197802197804
+      },
+      "class_distribution": {
+        "positives": 98,
+        "negatives": 91,
+        "positive_rate": 0.5185185185185185
+      }
+    },
+    "test": {
+      "size": 48,
+      "metrics": {
+        "accuracy": 0.5,
+        "precision": 0.5128205128205128,
+        "recall": 0.8,
+        "f1": 0.625,
+        "roc_auc": 0.528695652173913
+      },
+      "class_distribution": {
+        "positives": 25,
+        "negatives": 23,
+        "positive_rate": 0.5208333333333334
+      }
+    },
+    "artifacts": {
+      "model_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\nn_classification_next_day_GOOGL.keras",
+      "scaler_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\nn_classification_next_day_GOOGL_scaler.pkl",
+      "roc_curve_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\plots\\nn_classification_roc_GOOGL.png",
+      "confusion_matrix_path": "C:\\CODING PROJECTS\\sqlite-test\\stock_ingestor\\reports\\models\\neural_network_classification\\plots\\nn_classification_confusion_GOOGL.png"
+    },
+    "training_history": {
+      "accuracy": [
+        0.5185185074806213,
+        0.523809552192688,
+        0.5291005373001099,
+        0.5026454925537109,
+        0.5185185074806213,
+        0.523809552192688,
+        0.5767195820808411,
+        0.5396825671195984,
+        0.5185185074806213,
+        0.5291005373001099,
+        0.5820105671882629,
+        0.5767195820808411
+      ],
+      "loss": [
+        0.7139889597892761,
+        0.7017526030540466,
+        0.6975834965705872,
+        0.7086001038551331,
+        0.6965247392654419,
+        0.6965758204460144,
+        0.6833380460739136,
+        0.6884579062461853,
+        0.6827050447463989,
+        0.6873968243598938,
+        0.6829374432563782,
+        0.6785680651664734
+      ],
+      "val_accuracy": [
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.5,
+        0.4791666567325592,
+        0.4791666567325592,
+        0.4583333432674408,
+        0.4791666567325592
+      ],
+      "val_loss": [
+        0.6886612772941589,
+        0.688102662563324,
+        0.6887447237968445,
+        0.6899670958518982,
+        0.6911444067955017,
+        0.6923909783363342,
+        0.6938930153846741,
+        0.6953091621398926,
+        0.6968106627464294,
+        0.698499858379364,
+        0.7004909515380859,
+        0.7025189399719238
+      ]
+    }
+  }
+}
